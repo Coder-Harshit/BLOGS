@@ -24,5 +24,3 @@ That's when i found **Syncthing** - an open-source tool that lets you securely s
 ### 🚀 Curious: Have you tried going local-first?
 
 Whether for syncing, note-taking, or even backups — I'd love to hear how you've replaced cloud dependency with your own setup.
-
-#LocalFirst #OpenSource #SelfHosted #Syncthing #LinuxLife #PrivacyMatters #DevTools #HackYourSetup
