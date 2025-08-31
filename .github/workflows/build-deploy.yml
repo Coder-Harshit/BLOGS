@@ -75,7 +75,7 @@ jobs:
           git commit -m "🤖 Auto-update blog index [skip ci]" || echo "No changes to commit"
           git push
 
-      - name: Debug: List directory contents
+      - name: debug-List directory contents
         run: ls -lh
 
   build-deploy:
