@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Harshit's Blog{% endblock %}
+
+{% block description %}{{ summary or title }}{% endblock %}
+
+{% block styles %}
+<style>
+    .post-header {
+        background: var(--bg-secondary);
+        padding: 3rem 0;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .post-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .post-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .post-date::before {
+        content: "📅 ";
+    }
+
+    .post-tags {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        background: var(--accent-primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .post-content {
+        max-width: 800px;
+        margin: 0 auto;
+        background: var(--bg-secondary);
+        padding: 3rem;
+        border-radius: 1rem;
+        line-height: 1.8;
+    }
+
+    .post-content h1,
+    .post-content h2,
+    .post-content h3,
+    .post-content h4,
+    .post-content h5,
+    .post-content h6 {
+        margin: 2rem 0 1rem 0;
+        line-height: 1.3;
+        color: var(--text-primary);
+    }
+
+    .post-content h1 { font-size: 2rem; }
+    .post-content h2 { font-size: 1.75rem; }
+    .post-content h3 { font-size: 1.5rem; }
+    .post-content h4 { font-size: 1.25rem; }
+
+    .post-content p {
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .post-content ul,
+    .post-content ol {
+        margin: 1.5rem 0;
+        padding-left: 2rem;
+    }
+
+    .post-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .post-content blockquote {
+        background: var(--bg-tertiary);
+        border-left: 4px solid var(--accent-primary);
+        padding: 1rem 1.5rem;
+        margin: 2rem 0;
+        font-style: italic;
+        border-radius: 0 0.5rem 0.5rem 0;
+    }
+
+    .post-content code {
+        background: var(--bg-tertiary);
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-family: 'Fira Code', 'Consolas', monospace;
+        font-size: 0.875rem;
+    }
+
+    .post-content pre {
+        background: var(--bg-primary) !important;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        overflow-x: auto;
+        margin: 2rem 0;
+    }
+
+    .post-content pre code {
+        background: none;
+        padding: 0;
+    }
+
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+    }
+
+    .post-content a {
+        color: var(--accent-primary);
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        transition: text-decoration-color 0.2s;
+    }
+
+    .post-content a:hover {
+        text-decoration-color: var(--accent-primary);
+    }
+
+    .post-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+
+    .post-content th,
+    .post-content td {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .post-content th {
+        background: var(--bg-tertiary);
+        font-weight: 600;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--accent-primary);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .back-link:hover {
+        background: var(--bg-secondary);
+        border-color: var(--accent-primary);
+    }
+
+    .back-link::before {
+        content: "←";
+    }
+
+    @media (max-width: 768px) {
+        .post-header {
+            padding: 2rem 0;
+        }
+
+        .post-title {
+            font-size: 2rem;
+        }
+
+        .post-meta {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .post-content {
+            padding: 2rem 1rem;
+        }
+
+        .post-content h1 { font-size: 1.75rem; }
+        .post-content h2 { font-size: 1.5rem; }
+        .post-content h3 { font-size: 1.25rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/" class="back-link">Back to Posts</a>
+
+<article class="post-header">
+    <h1 class="post-title">{{ title }}</h1>
+    <div class="post-meta">
+        <span class="post-date">{{ date }}</span>
+        {% if tags %}
+        <div class="post-tags">
+            {% for tag in tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</article>
+
+<div class="post-content">
+    {{ content|safe }}
+</div>
+{% endblock %}
