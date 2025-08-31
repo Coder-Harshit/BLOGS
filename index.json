@@ -1,0 +1,19 @@
+[
+  {
+    "slug": "Syncthing",
+    "title": "Hello Syncthing",
+    "date": "2025-08-07",
+    "tags": [
+      "LocalFirst",
+      "OpenSource",
+      "SelfHosted",
+      "Syncthing",
+      "LinuxLife",
+      "PrivacyMatters",
+      "DevTools",
+      "HackYourSetup"
+    ],
+    "summary": "Moving from Cloud offered Syncing to Self Hosted Syncing via `Syncthing`",
+    "hash": "3d361535e55b9be0d7d2e0fab4663a316468b361a612534c5b79de89b429da8b"
+  }
+]
