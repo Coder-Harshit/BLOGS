@@ -1,242 +1,367 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="auto">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Harshit's Blog{% endblock %}</title>
-    <meta name="description"
-        content="{% block description %}Tech insights, code adventures, and system thinking by Harshit Vijay{% endblock %}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Harshit's Blog{% endblock %}</title>
+  <meta name="description" content="{% block description %}Tech insights, code adventures, and system thinking by Harshit Vijay{% endblock %}" />
 
-    <!-- Favicon
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico"> -->
+  <!-- Canonical & SEO -->
+  {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+  <meta name="author" content="Harshit Vijay" />
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet" />
+  <!-- OpenGraph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}{{ self.title()|striptags }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ self.description()|striptags }}{% endblock %}">
+  {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.og_title()|striptags }}">
+  <meta name="twitter:description" content="{{ self.og_description()|striptags }}">
+  {% if og_image %}<meta name="twitter:image" content="{{ og_image }}">{% endif %}
 
-    <!-- Prism.js Syntax Highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet"
-        media="(prefers-color-scheme: light)" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"
-        media="(prefers-color-scheme: dark)" />
+  <!-- Favicon (uncomment when ready) -->
+  <!-- <link rel="icon" type="image/png" href="/static/favicon.png"> -->
 
-    <style>
-        /* Light and Dark mode CSS variables as before */
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border-color: #e2e8f0;
-            --accent-primary: #3b82f6;
-            --accent-secondary: #8b5cf6;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
 
-        @media (prefers-color-scheme: dark) {
+  <!-- Prism.js Syntax Highlighting -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" media="(prefers-color-scheme: light)"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)"/>
 
-            [data-theme="dark"],
-            :root:not([data-theme="light"]) {
-                --bg-primary: #0f172a;
-                --bg-secondary: #1e293b;
-                --bg-tertiary: #334155;
-                --text-primary: #f1f5f9;
-                --text-secondary: #cbd5e1;
-                --text-tertiary: #94a3b8;
-                --border-color: #475569;
-                --accent-primary: #60a5fa;
-                --accent-secondary: #a78bfa;
-                --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-            }
-        }
+  <style>
+    /* ========= THEME TOKENS ========= */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --border-color: #e2e8f0;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+      --radius: 14px;
 
+      /* Typography scale using clamp for responsiveness */
+      --step--1: clamp(0.86rem, 0.80rem + 0.2vw, 0.95rem);
+      --step-0: clamp(1.0rem, 0.95rem + 0.3vw, 1.125rem);
+      --step-1: clamp(1.25rem, 1.15rem + 0.6vw, 1.5rem);
+      --step-2: clamp(1.563rem, 1.4rem + 1vw, 1.95rem);
+      --step-3: clamp(1.953rem, 1.7rem + 1.6vw, 2.441rem);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    @media (prefers-color-scheme: dark) {
+      [data-theme="dark"], :root:not([data-theme="light"]) {
+        --bg-primary: #0f172a;
+        --bg-secondary: #111827;
+        --bg-tertiary: #0b1220;
+        --text-primary: #e5e7eb;
+        --text-secondary: #cbd5e1;
+        --text-tertiary: #94a3b8;
+        --border-color: #1f2937;
+        --accent-primary: #60a5fa;
+        --accent-secondary: #a78bfa;
+        --shadow: 0 12px 28px rgba(0,0,0,0.35);
+      }
+    }
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+    * { box-sizing: border-box; }
+    html:focus-within { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      font-size: var(--step-0);
+      background: radial-gradient(1200px 600px at 100% -10%, rgba(99,102,241,0.08), transparent 60%),
+                  radial-gradient(1000px 500px at -20% 120%, rgba(59,130,246,0.10), transparent 60%),
+                  var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.65;
+      transition: background-color .3s ease, color .3s ease;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
-        /* Header */
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-        }
+    /* ========= HEADER ========= */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: saturate(1.2) blur(8px);
+      background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .header-content {
+      display: flex; align-items: center; gap: 1rem; padding: .85rem 0;
+    }
+    .brand {
+      display: flex; align-items: center; gap: .6rem; text-decoration: none;
+    }
+    .brand-logo {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: #fff; font-weight: 800;
+      box-shadow: var(--shadow);
+      font-size: .95rem;
+    }
+    .brand-text { color: var(--text-primary); font-weight: 700; letter-spacing: .2px; }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .nav { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+    .nav a {
+      color: var(--text-secondary); text-decoration: none; font-weight: 600;
+      padding: .5rem .75rem; border-radius: 10px;
+      transition: background .2s, color .2s, transform .2s;
+    }
+    .nav a:hover { background: var(--bg-tertiary); color: var(--accent-primary); transform: translateY(-1px); }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+    .search-wrap { position: relative; display: none; }
+    .search-input {
+      width: 220px; padding: .55rem .9rem .55rem 2.2rem;
+      border-radius: 999px; border: 1px solid var(--border-color);
+      background: var(--bg-primary); color: var(--text-primary);
+      outline: none;
+    }
+    .search-icon {
+      position: absolute; left: .6rem; top: 50%; transform: translateY(-50%);
+      font-size: .95rem; color: var(--text-tertiary);
+    }
 
-        .logo::before {
-            content: "💻";
-        }
+    .icon-btn {
+      background: none; border: 1px solid var(--border-color);
+      color: var(--text-secondary); padding: .45rem .6rem;
+      border-radius: 10px; cursor: pointer; transition: all .2s; font-size: 1.1rem;
+    }
+    .icon-btn:hover { background: var(--bg-tertiary); }
 
-        .nav {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
+    /* Hamburger (mobile) */
+    .hamburger { display: none; }
+    .hamburger button {
+      background: none; border: 1px solid var(--border-color); border-radius: 10px;
+      padding: .5rem .6rem; font-size: 1.2rem; color: var(--text-secondary); cursor: pointer;
+    }
 
-        .nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
+    /* Mobile drawer */
+    .drawer {
+      position: fixed; inset: 0 0 0 auto; width: 84%; max-width: 360px;
+      background: var(--bg-primary); border-left: 1px solid var(--border-color);
+      transform: translateX(100%); transition: transform .25s ease;
+      display: grid; grid-template-rows: auto 1fr auto; z-index: 110;
+      box-shadow: var(--shadow);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); }
+    .drawer-nav { display: grid; gap: .25rem; padding: 1rem; }
+    .drawer-nav a { padding: .75rem 1rem; border-radius: 10px; text-decoration: none; color: var(--text-primary); }
+    .drawer-nav a:hover { background: var(--bg-secondary); }
+    .drawer-footer { padding: 1rem; border-top: 1px solid var(--border-color); color: var(--text-tertiary); font-size: var(--step--1); }
 
-        .nav a:hover {
-            color: var(--accent-primary);
-        }
+    .scrim {
+      position: fixed; inset: 0; background: rgba(2,6,23,.35);
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .scrim.show { opacity: 1; pointer-events: auto; z-index: 105; }
 
-        .theme-toggle {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1.2rem;
-        }
+    /* ========= MAIN ========= */
+    .main { padding: 2rem 0; min-height: calc(100vh - 140px); }
 
-        .theme-toggle:hover {
-            background: var(--bg-tertiary);
-        }
+    /* ========= FOOTER ========= */
+    .footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      padding: 2rem 0; margin-top: 2rem;
+      color: var(--text-secondary);
+    }
+    .footer-grid {
+      display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      align-items: start;
+    }
+    .socials { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .chip {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem .7rem; border-radius: 999px; border: 1px solid var(--border-color);
+      text-decoration: none; color: var(--text-secondary); font-weight: 600; font-size: var(--step--1);
+    }
+    .chip:hover { background: var(--bg-tertiary); }
 
-        /* Main content */
-        .main {
-            padding: 2rem 0;
-            min-height: calc(100vh - 120px);
-        }
+    /* Utilities */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .hide-on-desktop { display: none; }
 
-        /* Footer */
-        .footer {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 2rem 0;
-            text-align: center;
-            color: var(--text-secondary);
-        }
+    /* Back-to-top */
+    #backToTop {
+      position: fixed; right: 1rem; bottom: 1rem; z-index: 120;
+      border: 1px solid var(--border-color); background: var(--bg-primary);
+      padding: .6rem .75rem; border-radius: 10px; display: none;
+      box-shadow: var(--shadow); cursor: pointer;
+    }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav {
-                gap: 1rem;
-            }
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .search-wrap { display: block; }
+      .nav a { padding: .45rem .6rem; }
+    }
+    @media (max-width: 768px) {
+      .nav { display: none; }
+      .hamburger { display: block; margin-left: auto; }
+      .search-wrap { display: none; }
+      .container { padding: 0 .75rem; }
+    }
 
-            .nav a {
-                font-size: 0.9rem;
-            }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+      html { scroll-behavior: auto; }
+    }
 
-            .container {
-                padding: 0 0.5rem;
-            }
-        }
-    </style>
+    /* Print niceties */
+    @media print {
+      .header, .footer, #backToTop { display: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+    }
+  </style>
 
-    {% block styles %}{% endblock %}
+  {% block styles %}{% endblock %}
 </head>
-
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/BLOGS/" class="logo">Harshit's Blog</a>
-                <nav class="nav">
-                    <a href="/BLOGS/">Home</a>
-                    <a href="/BLOGS/about.html">About</a>
-                    <a href="https://github.com/coder-Harshit" target="_blank">GitHub</a>
-                    <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank">LinkedIn</a>
-                    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">🌓</button>
-                </nav>
-            </div>
+  <!-- Scrim for mobile drawer -->
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <header class="header" role="banner">
+    <div class="container header-content">
+      <a href="/BLOGS/" class="brand" aria-label="Harshit's Blog home">
+        <span class="brand-logo">HV</span>
+        <span class="brand-text">Harshit's Blog</span>
+      </a>
+
+      <div class="search-wrap" role="search" aria-label="Site search">
+        <span class="search-icon">🔎</span>
+        <input id="search-input" class="search-input" type="search" placeholder="Search posts…" autocomplete="off" />
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="/BLOGS/">Home</a>
+        <a href="/BLOGS/about.html">About</a>
+        <a href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener">LinkedIn</a>
+        <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">🌓</button>
+      </nav>
+
+      <div class="hamburger">
+        <button id="open-drawer" aria-label="Open menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Mobile Navigation">
+    <div class="drawer-header">
+      <strong>Menu</strong>
+      <button class="icon-btn" id="close-drawer" aria-label="Close menu">✕</button>
+    </div>
+    <div class="drawer-nav" role="navigation">
+      <a href="/BLOGS/">Home</a>
+      <a href="/BLOGS/about.html">About</a>
+      <a href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener">LinkedIn</a>
+      <div style="margin-top:.5rem">
+        <input id="drawer-search" class="search-input" type="search" placeholder="Search posts…" autocomplete="off" />
+      </div>
+      <button class="icon-btn" id="drawer-theme" style="margin-top:.5rem" aria-label="Toggle theme">🌓 Theme</button>
+    </div>
+    <div class="drawer-footer">© {{ current_year or 2025 }} Harshit Vijay</div>
+  </aside>
+
+  <main class="main" role="main">
+    <div class="container">{% block content %}{% endblock %}</div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-grid">
+      <div>
+        <strong>Harshit's Blog</strong>
+        <p style="margin:.5rem 0 0;color:var(--text-tertiary)">Building the future, one line of code at a time. 🚀</p>
+      </div>
+      <div>
+        <div class="socials">
+          <a class="chip" href="/BLOGS/">Home</a>
+          <a class="chip" href="/BLOGS/about.html">About</a>
+          <a class="chip" href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
+          <a class="chip" href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener">LinkedIn</a>
         </div>
-    </header>
+      </div>
+      <div>
+        <small style="color:var(--text-tertiary)">© {{ current_year or 2025 }} Harshit Vijay</small>
+      </div>
+    </div>
+  </footer>
 
-    <main class="main">
-        <div class="container">{% block content %}{% endblock %}</div>
-    </main>
+  <button id="backToTop" aria-label="Back to top">↑</button>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; {{ current_year or 2025 }} Harshit Vijay. Building the future, one line of code at a time. 🚀</p>
-        </div>
-    </footer>
+  <!-- Prism.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
 
-    <!-- Prism.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script>
+    // ===== Theme toggle =====
+    const themeToggle = document.getElementById('theme-toggle');
+    const drawerTheme = document.getElementById('drawer-theme');
+    const htmlEl = document.documentElement;
+    const savedTheme = localStorage.getItem('theme') || 'auto';
+    htmlEl.setAttribute('data-theme', savedTheme);
 
+    function cycleTheme(btn) {
+      const current = htmlEl.getAttribute('data-theme');
+      let next;
+      if (current === 'light') { next = 'dark'; }
+      else if (current === 'dark') { next = 'auto'; }
+      else { next = 'light'; }
+      htmlEl.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      btn && (btn.textContent = next === 'light' ? '🌙' : next === 'dark' ? '☀️' : '🌓');
+    }
+    [themeToggle, drawerTheme].forEach(btn => {
+      if (btn) {
+        const t = savedTheme === 'light' ? '🌙' : savedTheme === 'dark' ? '☀️' : '🌓';
+        btn.textContent = btn.id === 'drawer-theme' ? (t + ' Theme') : t;
+        btn.addEventListener('click', () => cycleTheme(btn));
+      }
+    });
 
-    <!-- Theme toggle script -->
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
+    // ===== Mobile drawer =====
+    const drawer = document.getElementById('drawer');
+    const scrim = document.getElementById('scrim');
+    const openBtn = document.getElementById('open-drawer');
+    const closeBtn = document.getElementById('close-drawer');
+    const toggleDrawer = (open) => {
+      drawer.classList.toggle('open', open);
+      drawer.setAttribute('aria-hidden', String(!open));
+      scrim.classList.toggle('show', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    openBtn && openBtn.addEventListener('click', () => toggleDrawer(true));
+    closeBtn && closeBtn.addEventListener('click', () => toggleDrawer(false));
+    scrim && scrim.addEventListener('click', () => toggleDrawer(false));
 
-        const savedTheme = localStorage.getItem('theme') || 'auto';
-        html.setAttribute('data-theme', savedTheme);
+    // ===== Back to top =====
+    const backBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      backBtn.style.display = window.scrollY > 600 ? 'block' : 'none';
+    });
+    backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            let newTheme;
-            if (currentTheme === 'light') {
-                newTheme = 'dark';
-                themeToggle.textContent = '☀️';
-            } else if (currentTheme === 'dark') {
-                newTheme = 'auto';
-                themeToggle.textContent = '🌓';
-            } else {
-                newTheme = 'light';
-                themeToggle.textContent = '🌙';
-            }
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
+    // ===== Client-side search hook (index page wires this up) =====
+    window.__globalSearchInputs = ['search-input', 'drawer-search']
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+  </script>
 
-        if (savedTheme === 'light') themeToggle.textContent = '🌙';
-        else if (savedTheme === 'dark') themeToggle.textContent = '☀️';
-        else themeToggle.textContent = '🌓';
-    </script>
-
-    {% block scripts %}{% endblock %}
+  {% block scripts %}{% endblock %}
 </body>
-
 </html>

@@ -4,158 +4,147 @@
 
 {% block styles %}
 <style>
-    .hero {
-        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-        color: white;
-        padding: 4rem 0;
-        margin-bottom: 3rem;
-        border-radius: 1rem;
-        text-align: center;
-    }
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(800px 400px at 0% 0%, rgba(59,130,246,.18), transparent 60%),
+                radial-gradient(800px 400px at 100% 100%, rgba(139,92,246,.18), transparent 60%),
+                linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+    color: var(--text-primary);
+    padding: min(8vw, 4rem) 1rem;
+    margin: 1rem 0 2rem;
+    border-radius: var(--radius);
+    text-align: center;
+    border: 1px solid var(--border-color);
+  }
+  .hero h1 { font-size: var(--step-3); margin-bottom: .6rem; }
+  .hero p  { font-size: var(--step-1); color: var(--text-secondary); max-width: 58ch; margin: 0 auto; }
 
-    .hero h1 {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+  .controls { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; justify-content: center; margin: 1rem 0 2rem; }
+  .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.45rem .75rem; border-radius:999px; border:1px solid var(--border-color); cursor:pointer; }
+  .chip[aria-pressed="true"] { background: var(--accent-primary); color: #fff; border-color: transparent; }
+  .filter-bar { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; }
+  .filter-input {
+    min-width: 260px; max-width: 420px; padding:.6rem .9rem; border-radius: 10px;
+    border:1px solid var(--border-color); background:var(--bg-primary); outline:none;
+  }
 
-    .hero p {
-        font-size: 1.25rem;
-        opacity: 0.9;
-        max-width: 600px;
-        margin: 0 auto;
-    }
+  .posts-grid {
+    display: grid; gap: 1.2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  .post-card {
+    background: var(--bg-secondary); border:1px solid var(--border-color);
+    border-radius: var(--radius); padding: 1.2rem; text-decoration:none; color: inherit;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    display: grid; gap:.6rem;
+  }
+  .post-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: var(--accent-primary); }
+  .post-title { font-size: 1.1rem; font-weight: 700; letter-spacing:.2px; }
+  .post-summary { color: var(--text-secondary); }
+  .post-meta {
+    display:flex; justify-content: space-between; align-items:center; font-size:.9rem; color: var(--text-tertiary);
+  }
+  .post-tags { display:flex; gap:.4rem; flex-wrap: wrap; }
+  .tag { background: var(--bg-tertiary); color: var(--text-secondary); padding:.2rem .5rem; border-radius: 999px; font-size:.75rem; }
 
-    .posts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
+  .no-posts { text-align:center; padding: 3rem 1rem; color: var(--text-secondary); }
 
-    .post-card {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-
-    .post-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow);
-        border-color: var(--accent-primary);
-    }
-
-    .post-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-    }
-
-    .post-summary {
-        color: var(--text-secondary);
-        margin-bottom: 1rem;
-        line-height: 1.5;
-    }
-
-    .post-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.875rem;
-        color: var(--text-tertiary);
-    }
-
-    .post-date {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
-
-    .post-date::before {
-        content: "📅";
-    }
-
-    .post-tags {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .tag {
-        background: var(--bg-tertiary);
-        color: var(--text-secondary);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .no-posts {
-        text-align: center;
-        padding: 3rem;
-        color: var(--text-secondary);
-    }
-
-    .no-posts::before {
-        content: "📝";
-        font-size: 3rem;
-        display: block;
-        margin-bottom: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .hero h1 {
-            font-size: 2rem;
-        }
-
-        .hero p {
-            font-size: 1rem;
-        }
-
-        .posts-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+  @media (max-width:768px) {
+    .hero h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); }
+    .hero p { font-size: clamp(1rem, 2.8vw, 1.1rem); }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Welcome to My Digital Garden 🌱</h1>
-    <p>Exploring the intersection of systems, code, and curiosity. Join me on this journey through tech adventures and deep insights.</p>
-</div>
+<section class="hero">
+  <h1>Welcome to My Digital Garden 🌱</h1>
+  <p>Exploring the intersection of systems, code, and curiosity. Join me on this journey through tech adventures and deep insights.</p>
+</section>
+
+<section class="controls" aria-label="Filters">
+  <div class="filter-bar">
+    <input class="filter-input" id="client-search" type="search" placeholder="Search by title or summary…">
+    <button class="chip" id="clear-filters" title="Clear filters">♻️ Clear</button>
+  </div>
+  <div id="tag-chips" class="filter-bar"></div>
+</section>
 
 {% if posts %}
-<div class="posts-grid">
-    {% for post in posts %}
-    <a href="/BLOGS/{{ post.slug }}.html" class="post-card">
-        <h2 class="post-title">{{ post.title }}</h2>
-        {% if post.summary %}
-        <p class="post-summary">{{ post.summary }}</p>
-        {% endif %}
-        <div class="post-meta">
-            <span class="post-date">{{ post.date }}</span>
-            {% if post.tags %}
-            <div class="post-tags">
-                {% for tag in post.tags %}
-                <span class="tag">{{ tag }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-    </a>
-    {% endfor %}
+<div class="posts-grid" id="postsGrid">
+  {% for post in posts %}
+  <a href="/BLOGS/{{ post.slug }}.html" class="post-card"
+     data-title="{{ post.title|lower }}"
+     data-summary="{{ (post.summary or '')|lower }}"
+     data-tags="{{ (post.tags or [])|join(',')|lower }}">
+    <h2 class="post-title">{{ post.title }}</h2>
+    {% if post.summary %}<p class="post-summary">{{ post.summary }}</p>{% endif %}
+    <div class="post-meta">
+      <span class="post-date">📅 {{ post.date }}</span>
+      {% if post.tags %}
+      <div class="post-tags">
+        {% for tag in post.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
 </div>
 {% else %}
 <div class="no-posts">
-    <h2>Coming Soon...</h2>
-    <p>I'm working on some amazing content. Check back soon! 🚀</p>
+  <h2>Coming Soon…</h2>
+  <p>I'm working on some amazing content. Check back soon! 🚀</p>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ===== Build Tag Chips from rendered cards =====
+  const cards = [...document.querySelectorAll('.post-card')];
+  const allTags = new Set();
+  cards.forEach(card => (card.dataset.tags || '').split(',').filter(Boolean).forEach(t => allTags.add(t.trim())));
+
+  const tagWrap = document.getElementById('tag-chips');
+  const makeChip = (label) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = `# ${label}`; b.setAttribute('aria-pressed', 'false');
+    b.dataset.tag = label;
+    b.addEventListener('click', () => {
+      const active = b.getAttribute('aria-pressed') === 'true';
+      b.setAttribute('aria-pressed', String(!active));
+      filter();
+    });
+    return b;
+  };
+  [...allTags].sort().forEach(t => tagWrap.appendChild(makeChip(t)));
+
+  // ===== Text search across title + summary =====
+  const searchInputs = [document.getElementById('client-search'), ...(window.__globalSearchInputs || [])].filter(Boolean);
+  searchInputs.forEach(inp => inp.addEventListener('input', () => filter()));
+
+  // ===== Clear =====
+  document.getElementById('clear-filters').addEventListener('click', () => {
+    searchInputs.forEach(i => i.value = '');
+    tagWrap.querySelectorAll('.chip[aria-pressed="true"]').forEach(c => c.setAttribute('aria-pressed','false'));
+    filter();
+  });
+
+  function filter() {
+    const q = (searchInputs.find(i => i.value)?.value || '').trim().toLowerCase();
+    const activeTags = [...tagWrap.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.tag);
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const hay = `${card.dataset.title} ${card.dataset.summary}`;
+      const tagList = (card.dataset.tags || '').split(',').filter(Boolean);
+      const matchesText = !q || hay.includes(q);
+      const matchesTags = !activeTags.length || activeTags.every(t => tagList.includes(t));
+      const show = matchesText && matchesTags;
+      card.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    // Could display "no results" message if visibleCount == 0
+  }
+</script>
 {% endblock %}
