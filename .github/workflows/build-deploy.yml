@@ -3,17 +3,29 @@ name: Generate Index AND Build and Deploy Blog
 on:
   push:
     branches: [ "master" ]
+    # Include all paths whose changes may require a rebuild.
     paths:
       - "blog/*.md"
       - "templates/**"
+      - "static/**"
       - "build.py"
       - "generate_index.py"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/build-deploy.yml"
   pull_request:
     branches: [ "master" ]
     paths:
       - "blog/*.md"
       - "templates/**"
+      - "static/**"
+      - "build.py"
+      - "generate_index.py"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/build-deploy.yml"
+  schedule:
+    - cron: "0 0 1 * *"   # 1st of each month at 00:00 UTC (5:30 IST)
   workflow_dispatch:
     inputs:
       build_type:
@@ -33,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       has-changes: ${{ steps.check-changes.outputs.has-changes }}
+      full-build: ${{ steps.full-check.outputs.full-build }}
 
     steps:
       - uses: actions/checkout@v4
@@ -66,9 +79,66 @@ jobs:
             git diff --name-only
           fi
 
+      - name: Determine if full build needed
+        id: full-check
+        run: |
+          set -e
+
+          # Determine the "before" commit for diffing
+            # For PR events: base SHA
+            # For push events: github.event.before
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BEFORE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BEFORE_SHA="${{ github.event.before }}"
+          fi
+
+          # Fallback if BEFORE_SHA is empty (e.g., workflow_dispatch or first commit)
+          if [ -z "$BEFORE_SHA" ]; then
+            # Use previous commit if available
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              BEFORE_SHA=$(git rev-parse HEAD~1)
+            else
+              BEFORE_SHA=$(git rev-parse HEAD)
+            fi
+          fi
+
+          echo "Comparing changes between $BEFORE_SHA and $GITHUB_SHA"
+          CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" || true)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          FULL=false
+
+          # Patterns that should force a full build
+          echo "$CHANGED_FILES" | grep -E '(^|/)templates/' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)static/' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)build\.py$' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)generate_index\.py$' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)pyproject\.toml$' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)uv\.lock$' && FULL=true || true
+          echo "$CHANGED_FILES" | grep -E '(^|/)\.github/workflows/build-deploy\.yml$' && FULL=true || true
+
+          # If any blog post was deleted or renamed, force full build (cleanup needed)
+          DIFF_STATUS=$(git diff --name-status "$BEFORE_SHA" "$GITHUB_SHA" || true)
+          echo "Name-status diff:"
+          echo "$DIFF_STATUS"
+
+          echo "$DIFF_STATUS" | grep -qE '^[DR]\s+blog/' && FULL=true || true
+
+          # If manual dispatch with full selected, we still mark full-build for downstream clarity
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.build_type }}" = "full" ]; then
+            FULL=true
+          fi
+
+          echo "FULL build decision: $FULL"
+          echo "full-build=$FULL" >> $GITHUB_OUTPUT
+
       - name: Commit updated index
+        if: steps.check-changes.outputs.has-changes == 'true'
         run: |
           git config --global user.name "GitHub Actions Bot"
+            # Using noreply email to avoid exposing address
           git config --global user.email "actions@github.com"
           git add index.json
           git commit -m "🤖 Update index.json after generate_index.py [skip ci]" || echo "No changes to commit"
@@ -80,7 +150,12 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     needs: generate-index
-    if: needs.generate-index.outputs.has-changes == 'true' || github.event.inputs.build_type == 'full'
+    # Run if:
+    # - Full build explicitly required (structural changes)
+    # - Blog index changed (new/updated posts)
+    # - User requested full via dispatch
+    # - (Optional) schedule event (if schedule is enabled above)
+    if: needs.generate-index.outputs.full-build == 'true' || needs.generate-index.outputs.has-changes == 'true' || github.event.inputs.build_type == 'full' || github.event_name == 'schedule'
 
     permissions:
       contents: read
@@ -96,15 +171,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Ensure fresh git state
         run: |
-          git fetch --all
+          git fetch --all --prune
           git reset --hard origin/${{ github.ref_name }}
           git status
 
       - name: Confirm index.json exists before build
-        run: ls -lh index.json || (echo "index.json MISSING!"; exit 1)
+        run: |
+          if [ ! -f index.json ]; then
+            echo "index.json MISSING!"
+            exit 1
+          fi
+          ls -lh index.json
 
       - name: Setup UV
         uses: astral-sh/setup-uv@v6
@@ -112,12 +193,12 @@ jobs:
           enable-cache: true
           version: "latest"
 
-      - name: Setup Python  
+      - name: Setup Python
         run: uv python install ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: uv sync --locked --all-extras --dev
-        
+
       - name: Cache build assets
         uses: actions/cache@v4
         with:
@@ -130,7 +211,25 @@ jobs:
 
       - name: Build site
         run: |
+          BUILD_TYPE="incremental"
+          REASON="(index or post change)"
+
+          if [ "${{ needs.generate-index.outputs.full-build }}" = "true" ]; then
+            BUILD_TYPE="full"
+            REASON="(structural changes)"
+          fi
           if [ "${{ github.event.inputs.build_type }}" = "full" ]; then
+            BUILD_TYPE="full"
+            REASON="(manual dispatch)"
+          fi
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            BUILD_TYPE="full"
+            REASON="(scheduled full rebuild)"
+          fi
+
+          echo "Decided build type: $BUILD_TYPE $REASON"
+
+          if [ "$BUILD_TYPE" = "full" ]; then
             echo "🔄 Running full build..."
             uv run build.py full
           else
@@ -138,8 +237,9 @@ jobs:
             uv run build.py
           fi
 
-          # Add build timestamp
-          echo "Built on $(date)" > dist/build-info.txt
+          # Add build timestamp (for cache busting / diagnostics)
+          mkdir -p dist
+          echo "Built on $(date -u +"%Y-%m-%dT%H:%M:%SZ") from $GITHUB_SHA ($BUILD_TYPE)" > dist/build-info.txt
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -155,14 +255,20 @@ jobs:
 
       - name: Build summary
         run: |
+          DECIDED_TYPE="incremental"
+          if [ "${{ needs.generate-index.outputs.full-build }}" = "true" ] || [ "${{ github.event.inputs.build_type }}" = "full" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+            DECIDED_TYPE="full"
+          fi
           echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build Type**: ${{ github.event.inputs.build_type || 'incremental' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Type**: $DECIDED_TYPE" >> $GITHUB_STEP_SUMMARY
           echo "- **Site URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Build Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+            # Use UTC for consistency
+          echo "- **Build Time (UTC)**: $(date -u +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-
+          echo "- **Full-build flag**: ${{ needs.generate-index.outputs.full-build }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Index changed**: ${{ needs.generate-index.outputs.has-changes }}" >> $GITHUB_STEP_SUMMARY
           if [ -f dist/build-info.txt ]; then
-            echo "- **Files Built**: $(find dist -name '*.html' | wc -l) pages" >> $GITHUB_STEP_SUMMARY
+            echo "- **Pages Built**: $(find dist -name '*.html' | wc -l | tr -d ' ')" >> $GITHUB_STEP_SUMMARY
           fi
 
   cleanup:
@@ -176,18 +282,21 @@ jobs:
             const artifacts = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              per_page: 100
             });
 
-            const oldArtifacts = artifacts.data.artifacts
-              .filter(artifact => {
-                const age = Date.now() - new Date(artifact.created_at).getTime();
-                return age > 30 * 24 * 60 * 60 * 1000; // 30 days
-              });
+            const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+            const oldArtifacts = artifacts.data.artifacts.filter(a => {
+              const age = Date.now() - new Date(a.created_at).getTime();
+              return age > THIRTY_DAYS;
+            });
 
             for (const artifact of oldArtifacts) {
+              core.info(`Deleting artifact ${artifact.name} (${artifact.id})`);
               await github.rest.actions.deleteArtifact({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 artifact_id: artifact.id,
               });
             }
+            core.info(`Deleted ${oldArtifacts.length} artifact(s) older than 30 days.`);
