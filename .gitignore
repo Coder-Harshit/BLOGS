@@ -10,4 +10,4 @@ wheels/
 .venv
 
 # Local LOCAL
-blog/LOCAL/*
+blog/LOCAL
