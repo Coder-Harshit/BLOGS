@@ -45,7 +45,7 @@ class BlogGenerator:
 
         with open(INDEX_FILE, "r", encoding="utf-8") as f:
             posts_data = json.load(f)
-
+        
         # Load old index for comparison
         old_indx = self.load_old_indx()
 
@@ -117,6 +117,7 @@ class BlogGenerator:
 
         with open(INDEX_FILE, "r", encoding="utf-8") as f:
             posts_data = json.load(f)
+
 
         # Clear output directory
         if os.path.exists(OUTPUT_DIR):
