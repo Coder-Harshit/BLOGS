@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en" data-theme="auto"
+  class="h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 antialiased">
 
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +16,6 @@
   <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 
-  <!-- OpenGraph / Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="{% block og_title %}{{ self.title()|striptags }}{% endblock %}">
   <meta property="og:description" content="{% block og_description %}{{ self.description()|striptags }}{% endblock %}">
@@ -43,95 +43,60 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"
     media="(prefers-color-scheme: dark)" />
 
-  <link rel="stylesheet" href="/BLOGS/static/styles/base.css">
-
+  <link rel="stylesheet" href="/BLOGS/static/styles/tailwind.css">
 
   {% block styles %}{% endblock %}
 </head>
 
-<body>
-  <!-- Scrim for mobile drawer -->
-  <div class="scrim" id="scrim" aria-hidden="true"></div>
+<body class="min-h-full flex flex-col">
+  <div class="fixed inset-0 bg-black/50 opacity-0 hidden z-50 transition-opacity" id="scrim"></div>
 
-  <header class="header" role="banner">
-    <div class="container header-content">
-      <a href="/BLOGS/" class="brand" aria-label="Harshit's Blog home">
-        <span class="brand-logo">HV</span>
-        <span class="brand-text">Harshit's Blog</span>
+  <header
+    class="sticky top-0 z-40 bg-white/70 backdrop-blur-md dark:bg-slate-900/70 shadow-sm border-b border-slate-200 dark:border-slate-800">
+    <div class="container mx-auto flex items-center justify-between gap-4 p-4 lg:px-6">
+      <a href="/BLOGS/" class="flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white">
+        <span
+          class="w-9 h-9 grid place-items-center rounded-md bg-gradient-to-tr from-blue-500 to-purple-600 text-white font-extrabold shadow-lg">HV</span>
+        Harshit's Blog
       </a>
 
-      <div class="search-wrap" role="search" aria-label="Site search">
-        <span class="search-icon">🔎</span>
-        <input id="search-input" class="search-input" type="search" placeholder="Search posts…" autocomplete="off" />
-      </div>
-
-      <nav class="nav" aria-label="Primary">
-        <a href="/BLOGS/">Home</a>
-        <a href="/BLOGS/about.html">About</a>
-        <a href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener">LinkedIn</a>
-        <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">🌓</button>
+      <nav class="hidden lg:flex items-center gap-2 font-semibold">
+        <a href="/BLOGS/"
+          class="py-2 px-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">Home</a>
+        <a href="/BLOGS/about.html"
+          class="py-2 px-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">About</a>
+        <a href="https://github.com/coder-Harshit" target="_blank" rel="noopener"
+          class="py-2 px-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">GitHub</a>
+        <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener"
+          class="py-2 px-3 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">LinkedIn</a>
+        <button
+          class="flex-shrink-0 w-8 h-8 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          id="theme-toggle" aria-label="Toggle theme" title="Toggle theme">🌓</button>
       </nav>
 
-      <div class="hamburger">
-        <button id="open-drawer" aria-label="Open menu">☰</button>
-      </div>
+      <button
+        class="lg:hidden p-2 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        id="open-drawer" aria-label="Open menu">☰</button>
     </div>
   </header>
 
-  <!-- Mobile Drawer -->
-  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Mobile Navigation">
-    <div class="drawer-header">
-      <strong>Menu</strong>
-      <button class="icon-btn" id="close-drawer" aria-label="Close menu">✕</button>
-    </div>
-    <div class="drawer-nav" role="navigation">
-      <a href="/BLOGS/">Home</a>
-      <a href="/BLOGS/about.html">About</a>
-      <a href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank" rel="noopener">LinkedIn</a>
-      <div style="margin-top:.5rem">
-        <input id="drawer-search" class="search-input" type="search" placeholder="Search posts…" autocomplete="off" />
-      </div>
-      <button class="icon-btn" id="drawer-theme" style="margin-top:.5rem" aria-label="Toggle theme">🌓 Theme</button>
-    </div>
-    <div class="drawer-footer">© {{ current_year or 2025 }} Harshit Vijay</div>
-  </aside>
-
-  <main class="main" role="main">
-    <div class="container">{% block content %}{% endblock %}</div>
+  <main class="flex-grow pt-8">
+    <div class="container mx-auto px-4">{% block content %}{% endblock %}</div>
   </main>
 
-  <footer class="footer" role="contentinfo">
-    <div class="container footer-grid">
-      <div>
-        <strong>Harshit's Blog</strong>
-        <p style="margin:.5rem 0 0;color:var(--text-tertiary)">Building the future, one line of code at a time. 🚀</p>
-      </div>
-      <div>
-        <div class="socials">
-          <a class="chip" href="/BLOGS/">Home</a>
-          <a class="chip" href="/BLOGS/about.html">About</a>
-          <a class="chip" href="https://github.com/coder-Harshit" target="_blank" rel="noopener">GitHub</a>
-          <a class="chip" href="https://linkedin.com/in/harshit-vijay-coderv" target="_blank"
-            rel="noopener">LinkedIn</a>
-        </div>
-      </div>
-      <div>
-        <small style="color:var(--text-tertiary)">© {{ current_year or 2025 }} Harshit Vijay</small>
-      </div>
-    </div>
+  <footer
+    class="mt-12 py-8 bg-slate-100 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500 dark:text-slate-400">
+    <p>&copy; {{ current_year or 2025 }} Harshit Vijay. Built with Python and Tailwind CSS. 🚀</p>
   </footer>
 
-  <button id="backToTop" aria-label="Back to top">↑</button>
+  <button id="backToTop" aria-label="Back to top"
+    class="fixed right-4 bottom-4 p-3 rounded-full bg-slate-800 text-white shadow-lg transition-transform hover:-translate-y-1 hidden">↑</button>
 
-  <!-- Prism.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-
   <script>
     // ===== Theme toggle =====
     const themeToggle = document.getElementById('theme-toggle');

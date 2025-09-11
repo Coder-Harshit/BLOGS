@@ -11,3 +11,6 @@ wheels/
 
 # Local LOCAL
 blog/LOCAL
+
+# Node Modules (tailwind mgmt)
+node_modules/

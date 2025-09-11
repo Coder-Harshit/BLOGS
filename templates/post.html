@@ -3,37 +3,40 @@
 {% block title %}{{ title }} - Harshit's Blog{% endblock %}
 {% block description %}{{ summary or title }}{% endblock %}
 
-{% block styles %}
-<link rel="stylesheet" href="/BLOGS/static/styles/post.css">
-{% endblock %}
-
 {% block content %}
-<div class="progress-bar" id="progressBar" aria-hidden="true"></div>
+<div class="flex items-center gap-2 mb-4">
+  <a href="/BLOGS/"
+    class="inline-flex items-center gap-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+    aria-label="Back to Posts">← Back to Posts</a>
+</div>
 
-<a href="/BLOGS/" class="back-link" aria-label="Back to Posts">← Back to Posts</a>
+<article class="p-8 rounded-xl bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-700">
+  <div class="mb-6 text-center">
+    <h1 class="text-3xl lg:text-4xl font-extrabold mb-2">{{ title }}</h1>
+    <div class="flex flex-wrap items-center justify-center gap-x-4 text-sm text-slate-500 dark:text-slate-400">
+      <span>📅 {{ date }}</span>
+      {% if reading_time %}<span>⏱️ {{ reading_time }} min read</span>{% endif %}
+    </div>
+    {% if tags %}
+    <div class="flex flex-wrap justify-center gap-1 mt-2">
+      {% for tag in tags %}<span
+        class="px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-semibold">{{
+        tag }}</span>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
 
-<article class="post-header">
-  <h1 class="post-title">{{ title }}</h1>
-  <div class="post-meta">
-    <span class="post-date">📅 {{ date }}</span>
-    {% if reading_time %}<span>⏱️ {{ reading_time }} min read</span>{% endif %}
+  <div id="tocWrap"
+    class="mb-6 p-4 rounded-lg border border-dashed border-slate-400 dark:border-slate-600 text-sm text-slate-600 dark:text-slate-400"
+    hidden>
+    <div class="font-bold mb-1">On this page</div>
+    <nav id="toc" class="grid gap-1" aria-label="Table of contents"></nav>
   </div>
-  {% if tags %}
-  <div class="post-tags">
-    {% for tag in tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+
+  <div class="prose dark:prose-invert max-w-none" id="postContent">
+    {{ content|safe }}
   </div>
-  {% endif %}
 </article>
-
-<div id="tocWrap" class="toc-wrap" hidden>
-  <div class="toc-title">On this page</div>
-  <nav id="toc" class="toc" aria-label="Table of contents"></nav>
-</div>
-
-<div class="post-content" id="postContent">
-  {{ content|safe }}
-</div>
-
 {% endblock %}
 
 {% block scripts %}
