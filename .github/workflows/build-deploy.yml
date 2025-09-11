@@ -1,4 +1,4 @@
-name: Generate Index AND Build and Deploy Blog
+name: Build&Deploy
 
 on:
   push:
@@ -208,8 +208,7 @@ jobs:
         run: npm install
       
       - name: Build Tailwind CSS
-        run: npx tailwindcss -i ./static/styles/input.css -o /dist/styles/tailwind.css --minify
-
+        run: npx tailwindcss -i ./static/styles/input.css -o ./dist/static/styles/tailwind.css --minify
       - name: listdir
         run: tree -L 3
 
