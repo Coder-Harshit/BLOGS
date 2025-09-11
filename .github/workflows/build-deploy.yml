@@ -209,8 +209,6 @@ jobs:
       
       - name: Build Tailwind CSS
         run: npx tailwindcss -i ./static/styles/input.css -o ./static/styles/tailwind.css --minify
-      - name: listdir
-        run: tree -L 3
 
       - name: Cache build assets
         uses: actions/cache@v4
