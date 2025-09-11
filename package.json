@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npx tailwindcss -i ./static/styles/input.css -o ./dist/static/styles/tailwind.css --minify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
